@@ -1,0 +1,14 @@
+1.  npm install typings --global
+2.  typings init
+3.  typings search three
+4.  typings install dt~three --save --global
+5.  generate a jsconfig.json file in the root of the project folder
+
+jsconfig.json
+{
+"typeAcquisition": {
+"include": [
+"three"
+]
+}
+}

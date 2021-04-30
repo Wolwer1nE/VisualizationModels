@@ -3,17 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * { margin:0; padding:0; }
-        html, body { width:100%; height:100%; }
-        canvas {display:block; margin: 0 auto; }
-    </style>
-    <title>3D</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>3DEditor</title>
 </head>
-<body>
-    <canvas id="canvas"></canvas>
-    <script src="three.min.js"></script>
-    <script src="dat.gui.min.js"></script>
-    <script src="index.js"></script>
+<body >
+    <div class = "scene">
+        <canvas id="canvas"></canvas>
+        <div class = "footer">
+            <button>up</button>
+            <button>down</button>
+            <button>left</button>
+            <button>right</button>
+        </div>
+    </div>
+
+    <div class = "sidebarObjects">
+        <h5>
+            <font>
+                СПИСОК ОБЪЕКТОВ НА СЦЕНЕ
+            </font>
+        </h5> 
+        <div>
+            <font>
+                имена объектов
+            </font>
+        </div>
+    </div>
+    <div class = "sidebarProperties">
+        <h5>
+            <font>
+                СВОЙСТВА ВЫБРАННОГО ОБЪЕКТА
+            </font>
+        </h5>
+        <div>
+            <font>
+                свойства объектов на сцене
+            </font>
+        </div>
+    </div>
+    <script src="engine/three.js"></script>
+    <script src="./script.js"></script>
 </body>
 </html>
