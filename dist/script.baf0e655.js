@@ -36407,8 +36407,8 @@ module.exports = {
   "points": [[-1, -1, -1], [-1, 1, -1], [1, 1, -1], [1, -1, -1], [-1, -1, 1], [-1, 1, 1], [1, 1, 1], [1, -1, 1], [0, 0, 1.5]],
   "mesh": {
     "PZT-4": {
-      "cubes": [[0, 1, 2, 3, 4, 5, 6, 7]],
-      "thetra": [5, 6, 7, 8],
+      "cubes": [[0, 1, 2, 3, 4, 5, 6, 7], [1, 1, 1]],
+      "thetra": [[5, 6, 7, 8]],
       "triangles": [],
       "squares": []
     }
@@ -36416,70 +36416,133 @@ module.exports = {
   "type": 5,
   "variables": ["ux", "uy", "uz", "phi"]
 };
-},{}],"src/script.js":[function(require,module,exports) {
+},{}],"src/scene-controller.js":[function(require,module,exports) {
 "use strict";
 
-var THREE = _interopRequireWildcard(require("three"));
-
-var _small_dataset = _interopRequireDefault(require("../data/small_dataset.json"));
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
-
-function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
-
-console.log(_small_dataset.default);
-var canvas = document.getElementById("canvas");
-var fieldScene = document.getElementsByClassName("scene");
-var fieldSidebarObjects = document.getElementsByClassName("sidebarObjects")[0];
-var fieldSidebarProperties = document.getElementsByClassName("sidebarProperties")[0];
-var fieldFooter = document.getElementsByClassName("footer")[0];
-var PART_BLOCK = 6;
-var HEIGHT_FOOTER = window.innerHeight / 20;
-var MIN_HEIGHT_BLOCK_LIST_OBJECTS = window.innerHeight / 3;
-var MAX_HEIGHT_BLOCK_LIST_OBJECTS = window.innerHeight / 3;
-var MIN_HEIGHT_BLOCK_PROPERTIES_OBJECTS = window.innerHeight - MIN_HEIGHT_BLOCK_LIST_OBJECTS;
-var MAX_HEIGHT_BLOCK_PROPERTIES_OBJECTS = window.innerHeight - MAX_HEIGHT_BLOCK_LIST_OBJECTS;
-var WIDTH_CANVAS = window.innerWidth - window.innerWidth / PART_BLOCK;
-var HEIGHT_CANVAS = window.innerHeight - HEIGHT_FOOTER;
-canvas.width = WIDTH_CANVAS;
-canvas.height = HEIGHT_CANVAS;
-var renderer = new THREE.WebGLRenderer({
-  canvas: canvas
+Object.defineProperty(exports, "__esModule", {
+  value: true
 });
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(60, WIDTH_CANVAS / HEIGHT_CANVAS);
-var cubeGeometry = new THREE.BoxGeometry(1, 1, 1, 4, 4, 4);
-var cubeMaterial = new THREE.MeshNormalMaterial();
-var cubeMesh = new THREE.Mesh(cubeGeometry, cubeMaterial);
-cubeMesh.position.y = 0;
-camera.position.z = 10;
-camera.position.y = 5;
-scene.add(cubeMesh);
-var wheelState = {
-  holdWheel: false,
-  beginPositionX: undefined,
-  beginPositionY: undefined,
-  previousPositionX: undefined,
-  previousPositionY: undefined,
-  coefYaw: 10,
-  //X
-  coefPitch: 10 //Y
+exports.default = initSceneController;
 
-};
-var leftMouseButtonState = {
-  holdButton: false,
-  beginPositionX: undefined,
-  beginPositionY: undefined,
-  previousPositionX: undefined,
-  previousPositionY: undefined,
-  coef: 1
-};
+function initSceneController(canvas, objectUnderControl, camera, WIDTH_CANVAS, HEIGHT_CANVAS) {
+  orbitControls(canvas, objectUnderControl, camera, WIDTH_CANVAS, HEIGHT_CANVAS);
+}
 
-function init() {
+function orbitControls(canvas, objectUnderControl, camera, WIDTH_CANVAS, HEIGHT_CANVAS) {
+  var wheelState = {
+    holdWheel: false,
+    beginPositionX: undefined,
+    beginPositionY: undefined,
+    previousPositionX: undefined,
+    previousPositionY: undefined,
+    coefYaw: 10,
+    //X
+    coefPitch: 10 //Y
+
+  };
+  var leftMouseButtonState = {
+    holdButton: false,
+    beginPositionX: undefined,
+    beginPositionY: undefined,
+    previousPositionX: undefined,
+    previousPositionY: undefined,
+    coef: 1
+  };
+
+  canvas.onmousedown = function (event) {
+    if (event.which == 2 && !wheelState.holdWheel) {
+      wheelState.beginPositionX = event.offsetX;
+      wheelState.beginPositionY = event.offsetY;
+      wheelState.holdWheel = true;
+    }
+
+    if (event.which == 1) {
+      leftMouseButtonState.beginPositionX = event.offsetX;
+      leftMouseButtonState.beginPositionY = event.offsetY;
+      leftMouseButtonState.holdButton = true;
+    }
+  };
+
+  canvas.onmouseup = function (event) {
+    if (event.which == 2 && wheelState.holdWheel) {
+      wheelState.holdWheel = false;
+    }
+
+    if (event.which == 1 && leftMouseButtonState.holdButton) {
+      leftMouseButtonState.holdButton = false;
+    }
+  };
+
+  canvas.onwheel = function (event) {
+    if (event.deltaY < 0) camera.translateZ(-1);
+    if (event.deltaY > 0) camera.translateZ(+1);
+  };
+
+  canvas.onmousemove = function (event) {
+    if (wheelState.holdWheel) {
+      var stepX = (wheelState.beginPositionX - event.offsetX) / WIDTH_CANVAS;
+      var stepY = (wheelState.beginPositionY - event.offsetY) / HEIGHT_CANVAS;
+
+      if (stepX < 0 && wheelState.previousPositionX > event.offsetX || stepX > 0 && wheelState.previousPositionX < event.offsetX) {
+        wheelState.beginPositionX = wheelState.previousPositionX;
+      }
+
+      if (stepY < 0 && wheelState.previousPositionY > event.offsetY || stepY > 0 && wheelState.previousPositionY < event.offsetY) {
+        wheelState.beginPositionY = wheelState.previousPositionY;
+      }
+
+      camera.rotation.y += stepX / wheelState.coefYaw;
+      camera.rotation.x += stepY / wheelState.coefPitch;
+      wheelState.previousPositionX = event.offsetX;
+      wheelState.previousPositionY = event.offsetY;
+    }
+
+    if (leftMouseButtonState.holdButton) {
+      var _stepX = (leftMouseButtonState.beginPositionX - event.offsetX) / WIDTH_CANVAS;
+
+      var _stepY = (leftMouseButtonState.beginPositionY - event.offsetY) / HEIGHT_CANVAS;
+
+      if (_stepX < 0 && leftMouseButtonState.previousPositionX > event.offsetX || _stepX > 0 && leftMouseButtonState.previousPositionX < event.offsetX) {
+        leftMouseButtonState.beginPositionX = leftMouseButtonState.previousPositionX;
+      }
+
+      if (_stepY < 0 && leftMouseButtonState.previousPositionY > event.offsetY || _stepY > 0 && leftMouseButtonState.previousPositionY < event.offsetY) {
+        leftMouseButtonState.beginPositionY = leftMouseButtonState.previousPositionY;
+      }
+
+      camera.translateX(_stepX / leftMouseButtonState.coef);
+      camera.translateY(-_stepY / leftMouseButtonState.coef);
+      leftMouseButtonState.previousPositionX = event.offsetX;
+      leftMouseButtonState.previousPositionY = event.offsetY;
+    }
+
+    camera.lookAt(objectUnderControl.position);
+  };
+}
+},{}],"src/init-scene.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = initScene;
+
+function initScene(document) {
+  var canvas = document.getElementById("canvas");
+  var fieldSidebarObjects = document.getElementsByClassName("sidebarObjects")[0];
+  var fieldSidebarProperties = document.getElementsByClassName("sidebarProperties")[0];
+  var fieldFooter = document.getElementsByClassName("footer")[0];
+  var PART_BLOCK = 6;
+  var HEIGHT_FOOTER = window.innerHeight / 20;
+  var MIN_HEIGHT_BLOCK_LIST_OBJECTS = window.innerHeight / 3;
+  var MAX_HEIGHT_BLOCK_LIST_OBJECTS = window.innerHeight / 3;
+  var MIN_HEIGHT_BLOCK_PROPERTIES_OBJECTS = window.innerHeight - MIN_HEIGHT_BLOCK_LIST_OBJECTS;
+  var MAX_HEIGHT_BLOCK_PROPERTIES_OBJECTS = window.innerHeight - MAX_HEIGHT_BLOCK_LIST_OBJECTS;
+  var WIDTH_CANVAS = window.innerWidth - window.innerWidth / PART_BLOCK;
+  var HEIGHT_CANVAS = window.innerHeight - HEIGHT_FOOTER;
+  canvas.width = WIDTH_CANVAS;
+  canvas.height = HEIGHT_CANVAS;
   canvas.style = "display: block; background-color: #303050;";
-  renderer.setClearColor(0x909090);
   fieldSidebarObjects.style.background = "#320b35";
   fieldSidebarProperties.style.background = "#310062";
   fieldSidebarObjects.style.minHeight = MIN_HEIGHT_BLOCK_LIST_OBJECTS + 'px';
@@ -36492,17 +36555,160 @@ function init() {
   fieldFooter.style.maxWidth = WIDTH_CANVAS;
   fieldSidebarObjects.style.overflowY = 'auto';
   fieldSidebarProperties.style.overflowY = 'auto';
+}
+},{}],"src/dataset-reader.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+//[5,6,7,8]
+var DatasetReader =
+/*#__PURE__*/
+function () {
+  function DatasetReader(dataset) {
+    _classCallCheck(this, DatasetReader);
+
+    this.dataset = dataset;
+    this.structureFigurePoints = new Map();
+  }
+
+  _createClass(DatasetReader, [{
+    key: "getMeshes",
+    value: function getMeshes() {
+      var meshes = this.dataset['mesh'];
+      var setPoints = this.dataset['points'];
+      var keysMeshes = Object.keys(meshes);
+
+      for (var i = 0; i < keysMeshes.length; i++) {
+        var keysNameFigures = Object.keys(meshes[keysMeshes[i]]);
+
+        for (var j = 0; j < keysNameFigures.length; j++) {
+          var figures = meshes[keysMeshes[i]][keysNameFigures[j]];
+          var setFigures = [];
+
+          for (var k = 0; k < figures.length; k++) {
+            var points = [];
+
+            for (var m = 0; m < figures[k].length; m++) {
+              points.push(setPoints[figures[k][m]]);
+            }
+
+            setFigures.push(points);
+          }
+
+          if (setFigures.length != 0) this.structureFigurePoints.set(keysNameFigures[j], setFigures);
+        }
+      }
+
+      return this.structureFigurePoints;
+    }
+  }, {
+    key: "getNamesMeshes",
+    value: function getNamesMeshes() {
+      var meshes = this.dataset['mesh'];
+      var keysMeshes = Object.keys(meshes);
+      return keysMeshes;
+    }
+  }]);
+
+  return DatasetReader;
+}();
+
+exports.default = DatasetReader;
+},{}],"src/object-on-scene.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ObjectOnScene = function ObjectOnScene(name, points) {
+  _classCallCheck(this, ObjectOnScene);
+
+  this.name = name;
+  this.points = points;
+  this.isVisible = true;
+};
+
+exports.default = ObjectOnScene;
+},{}],"src/script.js":[function(require,module,exports) {
+"use strict";
+
+var THREE = _interopRequireWildcard(require("three"));
+
+var _small_dataset = _interopRequireDefault(require("../data/small_dataset.json"));
+
+var _sceneController = _interopRequireDefault(require("./scene-controller.js"));
+
+var _initScene = _interopRequireDefault(require("./init-scene.js"));
+
+var _datasetReader = _interopRequireDefault(require("./dataset-reader"));
+
+var _objectOnScene = _interopRequireDefault(require("./object-on-scene"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
+
+function _interopRequireWildcard(obj, nodeInterop) { if (!nodeInterop && obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(nodeInterop); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (key !== "default" && Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e2) { throw _e2; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e3) { didErr = true; err = _e3; }, f: function f() { try { if (!normalCompletion && it.return != null) it.return(); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var canvas = document.getElementById('canvas');
+(0, _initScene.default)(document);
+var renderer = new THREE.WebGLRenderer({
+  canvas: canvas
+});
+var scene = new THREE.Scene();
+var camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height);
+var objectsOnScene = [];
+var reader = new _datasetReader.default(_small_dataset.default);
+init();
+loadObjectsOnScene();
+animate();
+/* ------------------------------------------------------------------------- */
+
+function init() {
   var planeGeometry = new THREE.PlaneGeometry(100, 100, 1, 1);
   var planeMaterial = new THREE.MeshBasicMaterial({
     color: 0x404040
   });
   var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  camera.position.z = 10;
+  camera.position.y = 5;
   plane.rotation.x = -0.5 * Math.PI;
   plane.position.x = 0;
-  plane.position.y = -0.5;
+  plane.position.y = -5;
   plane.position.z = 0;
-  scene.add(new THREE.AxesHelper(20));
   scene.add(plane);
+  var axes = new THREE.AxesHelper(20);
+  scene.add(axes);
+  (0, _sceneController.default)(canvas, axes, camera, canvas.width, canvas.height);
+  renderer.setClearColor(0x909090);
 }
 
 function animate() {
@@ -36510,79 +36716,30 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-canvas.onmousedown = function (event) {
-  if (event.which == 2 && !wheelState.holdWheel) {
-    wheelState.beginPositionX = event.offsetX;
-    wheelState.beginPositionY = event.offsetY;
-    wheelState.holdWheel = true;
-  }
+function loadObjectsOnScene() {
+  var figures = reader.getMeshes();
 
-  if (event.which == 1) {
-    leftMouseButtonState.beginPositionX = event.offsetX;
-    leftMouseButtonState.beginPositionY = event.offsetY;
-    leftMouseButtonState.holdButton = true;
-  }
-};
+  var _iterator = _createForOfIteratorHelper(figures),
+      _step;
 
-canvas.onmousemove = function (event) {
-  if (wheelState.holdWheel) {
-    var stepX = (wheelState.beginPositionX - event.offsetX) / WIDTH_CANVAS;
-    var stepY = (wheelState.beginPositionY - event.offsetY) / HEIGHT_CANVAS;
+  try {
+    for (_iterator.s(); !(_step = _iterator.n()).done;) {
+      var _step$value = _slicedToArray(_step.value, 2),
+          key = _step$value[0],
+          value = _step$value[1];
 
-    if (stepX < 0 && wheelState.previousPositionX > event.offsetX || stepX > 0 && wheelState.previousPositionX < event.offsetX) {
-      wheelState.beginPositionX = wheelState.previousPositionX;
+      for (var i = 0; i < value.length; i++) {
+        var object = new _objectOnScene.default(key, value[i]);
+        objectsOnScene.push(object);
+      }
     }
-
-    if (stepY < 0 && wheelState.previousPositionY > event.offsetY || stepY > 0 && wheelState.previousPositionY < event.offsetY) {
-      wheelState.beginPositionY = wheelState.previousPositionY;
-    }
-
-    camera.rotation.y += stepX / wheelState.coefYaw;
-    camera.rotation.x += stepY / wheelState.coefPitch;
-    wheelState.previousPositionX = event.offsetX;
-    wheelState.previousPositionY = event.offsetY;
+  } catch (err) {
+    _iterator.e(err);
+  } finally {
+    _iterator.f();
   }
-
-  if (leftMouseButtonState.holdButton) {
-    var _stepX = (leftMouseButtonState.beginPositionX - event.offsetX) / WIDTH_CANVAS;
-
-    var _stepY = (leftMouseButtonState.beginPositionY - event.offsetY) / HEIGHT_CANVAS;
-
-    if (_stepX < 0 && leftMouseButtonState.previousPositionX > event.offsetX || _stepX > 0 && leftMouseButtonState.previousPositionX < event.offsetX) {
-      leftMouseButtonState.beginPositionX = leftMouseButtonState.previousPositionX;
-    }
-
-    if (_stepY < 0 && leftMouseButtonState.previousPositionY > event.offsetY || _stepY > 0 && leftMouseButtonState.previousPositionY < event.offsetY) {
-      leftMouseButtonState.beginPositionY = leftMouseButtonState.previousPositionY;
-    }
-
-    camera.translateX(_stepX / leftMouseButtonState.coef);
-    camera.translateY(-_stepY / leftMouseButtonState.coef);
-    leftMouseButtonState.previousPositionX = event.offsetX;
-    leftMouseButtonState.previousPositionY = event.offsetY;
-  }
-
-  camera.lookAt(cubeMesh.position);
-};
-
-canvas.onmouseup = function (event) {
-  if (event.which == 2 && wheelState.holdWheel) {
-    wheelState.holdWheel = false;
-  }
-
-  if (event.which == 1 && leftMouseButtonState.holdButton) {
-    leftMouseButtonState.holdButton = false;
-  }
-};
-
-canvas.onwheel = function (event) {
-  if (event.deltaY < 0) camera.translateZ(-1);
-  if (event.deltaY > 0) camera.translateZ(+1);
-};
-
-init();
-animate();
-},{"three":"node_modules/three/build/three.module.js","../data/small_dataset.json":"data/small_dataset.json"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+}
+},{"three":"node_modules/three/build/three.module.js","../data/small_dataset.json":"data/small_dataset.json","./scene-controller.js":"src/scene-controller.js","./init-scene.js":"src/init-scene.js","./dataset-reader":"src/dataset-reader.js","./object-on-scene":"src/object-on-scene.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -36610,7 +36767,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63952" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55667" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
