@@ -36407,7 +36407,7 @@ module.exports = {
   "points": [[-1, -1, -1], [-1, 1, -1], [1, 1, -1], [1, -1, -1], [-1, -1, 1], [-1, 1, 1], [1, 1, 1], [1, -1, 1], [0, 0, 1.5]],
   "mesh": {
     "PZT-4": {
-      "cubes": [[0, 1, 2, 3, 4, 5, 6, 7], [1, 1, 1]],
+      "cubes": [[0, 1, 2, 3, 4, 5, 6, 7]],
       "thetra": [[5, 6, 7, 8]],
       "triangles": [],
       "squares": []
@@ -36634,13 +36634,49 @@ exports.default = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ObjectOnScene = function ObjectOnScene(name, points) {
-  _classCallCheck(this, ObjectOnScene);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  this.name = name;
-  this.points = points;
-  this.isVisible = true;
-};
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var ObjectOnScene =
+/*#__PURE__*/
+function () {
+  function ObjectOnScene(name, points) {
+    _classCallCheck(this, ObjectOnScene);
+
+    this.name = name;
+    this.points = points;
+    this.checker = undefined;
+    this.pointsObjectGrid = [];
+    this.color = "rgb(" + this._getRandom(130, 255) + "," + this._getRandom(130, 255) + "," + this._getRandom(130, 255) + ")";
+    this.nameContentHTMLButton = this.name + "button";
+    this.nameContentHTMLCheckbox = this.name + "checkbox";
+    this.styleContentHTML = "<font><div><input type=\"checkbox\" id=" + this.nameContentHTMLCheckbox + " name=" + this.name + " checked> <label for=" + this.name + ">" + this.name + "</label><button id=\"" + this.nameContentHTMLButton + "\" style=\"margin: 3px 3px 3px 10px; padding: 2px 2px 2px 2px\"><font style=\"\">Выбрать</font></button></div></font>";
+  }
+
+  _createClass(ObjectOnScene, [{
+    key: "getObjectGrid",
+    value: function getObjectGrid() {
+      for (var i = 0; i < this.points.length; i++) {
+        for (var j = i + 1; j < this.points.length; j++) {
+          var beginPosition = new Array(this.points[i][0], this.points[i][1], this.points[i][2]);
+          var endPosition = new Array(this.points[j][0], this.points[j][1], this.points[j][2]);
+          this.pointsObjectGrid.push(beginPosition);
+          this.pointsObjectGrid.push(endPosition);
+        }
+      }
+
+      return this.pointsObjectGrid;
+    }
+  }, {
+    key: "_getRandom",
+    value: function _getRandom(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+  }]);
+
+  return ObjectOnScene;
+}();
 
 exports.default = ObjectOnScene;
 },{}],"src/script.js":[function(require,module,exports) {
@@ -36679,16 +36715,23 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 var canvas = document.getElementById('canvas');
+var listNameObjects = document.getElementById('listNameObjects');
 (0, _initScene.default)(document);
 var renderer = new THREE.WebGLRenderer({
   canvas: canvas
 });
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height);
-var objectsOnScene = [];
+var objectsInDataset = [];
 var reader = new _datasetReader.default(_small_dataset.default);
+var listObjects = [];
+var pointOfView = {
+  x: 0,
+  y: 0,
+  z: 0
+};
 init();
-loadObjectsOnScene();
+loadObjectsFromDataset();
 animate();
 /* ------------------------------------------------------------------------- */
 
@@ -36698,7 +36741,7 @@ function init() {
     color: 0x404040
   });
   var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-  camera.position.z = 10;
+  camera.position.z = 15;
   camera.position.y = 5;
   plane.rotation.x = -0.5 * Math.PI;
   plane.position.x = 0;
@@ -36714,9 +36757,17 @@ function init() {
 function animate() {
   requestAnimationFrame(animate);
   renderer.render(scene, camera);
+  draw();
 }
 
-function loadObjectsOnScene() {
+function draw() {
+  for (var _i = 0, _listObjects = listObjects; _i < _listObjects.length; _i++) {
+    var object = _listObjects[_i];
+    object.line.visible = object.object.checker.checked;
+  }
+}
+
+function loadObjectsFromDataset() {
   var figures = reader.getMeshes();
 
   var _iterator = _createForOfIteratorHelper(figures),
@@ -36728,15 +36779,43 @@ function loadObjectsOnScene() {
           key = _step$value[0],
           value = _step$value[1];
 
-      for (var i = 0; i < value.length; i++) {
-        var object = new _objectOnScene.default(key, value[i]);
-        objectsOnScene.push(object);
+      for (var _i3 = 0; _i3 < value.length; _i3++) {
+        var _object = new _objectOnScene.default(key + _i3, value[_i3]);
+
+        objectsInDataset.push(_object);
       }
     }
   } catch (err) {
     _iterator.e(err);
   } finally {
     _iterator.f();
+  }
+
+  for (var _i2 = 0, _objectsInDataset = objectsInDataset; _i2 < _objectsInDataset.length; _i2++) {
+    var object = _objectsInDataset[_i2];
+    listNameObjects.insertAdjacentHTML('afterend', object.styleContentHTML);
+    var checker = document.getElementById(object.nameContentHTMLCheckbox);
+    checker.checked = true;
+    object.checker = checker;
+    var listPoints = object.getObjectGrid();
+    var objectPoints = [];
+
+    for (var i = 0; i < listPoints.length; i++) {
+      var vector = new THREE.Vector3(listPoints[i][0], listPoints[i][1], listPoints[i][2]);
+      objectPoints.push(vector);
+    }
+
+    var material = new THREE.LineBasicMaterial({
+      color: object.color
+    });
+    var geometry = new THREE.BufferGeometry().setFromPoints(objectPoints);
+    var line = new THREE.Line(geometry, material);
+    console.log(line);
+    scene.add(line);
+    listObjects.push({
+      object: object,
+      line: line
+    });
   }
 }
 },{"three":"node_modules/three/build/three.module.js","../data/small_dataset.json":"data/small_dataset.json","./scene-controller.js":"src/scene-controller.js","./init-scene.js":"src/init-scene.js","./dataset-reader":"src/dataset-reader.js","./object-on-scene":"src/object-on-scene.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
@@ -36767,7 +36846,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55667" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57826" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
