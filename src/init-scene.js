@@ -15,7 +15,7 @@ export default function initScene(document) {
     canvas.width = WIDTH_CANVAS;
     canvas.height = HEIGHT_CANVAS;    
 
-    canvas.style = "display: block; background-color: #303050;"
+    //canvas.style = "display: block; background-color: #303050;"
 
     fieldSidebarObjects.style.background = "#320b35";
     fieldSidebarProperties.style.background = "#310062"

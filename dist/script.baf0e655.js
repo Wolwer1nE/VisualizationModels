@@ -36407,7 +36407,7 @@ module.exports = {
   "points": [[-1, -1, -1], [-1, 1, -1], [1, 1, -1], [1, -1, -1], [-1, -1, 1], [-1, 1, 1], [1, 1, 1], [1, -1, 1], [0, 0, 1.5]],
   "mesh": {
     "PZT-4": {
-      "cubes": [[0, 1, 2, 3, 4, 5, 6, 7], [1, 1, 1]],
+      "cubes": [[0, 1, 2, 3, 4, 5, 6, 7]],
       "thetra": [[5, 6, 7, 8]],
       "triangles": [],
       "squares": []
@@ -36541,8 +36541,8 @@ function initScene(document) {
   var WIDTH_CANVAS = window.innerWidth - window.innerWidth / PART_BLOCK;
   var HEIGHT_CANVAS = window.innerHeight - HEIGHT_FOOTER;
   canvas.width = WIDTH_CANVAS;
-  canvas.height = HEIGHT_CANVAS;
-  canvas.style = "display: block; background-color: #303050;";
+  canvas.height = HEIGHT_CANVAS; //canvas.style = "display: block; background-color: #303050;"
+
   fieldSidebarObjects.style.background = "#320b35";
   fieldSidebarProperties.style.background = "#310062";
   fieldSidebarObjects.style.minHeight = MIN_HEIGHT_BLOCK_LIST_OBJECTS + 'px';
@@ -36634,16 +36634,173 @@ exports.default = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ObjectOnScene = function ObjectOnScene(name, points) {
-  _classCallCheck(this, ObjectOnScene);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  this.name = name;
-  this.points = points;
-  this.isVisible = true;
-};
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var ObjectOnScene =
+/*#__PURE__*/
+function () {
+  function ObjectOnScene(name, points) {
+    var number = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+
+    _classCallCheck(this, ObjectOnScene);
+
+    this.name = name + number;
+    this.points = points;
+    this.checker = undefined;
+    this.pointsObjectGrid = [];
+    this.color = "rgb(" + this._getRandom(130, 255) + "," + this._getRandom(130, 255) + "," + this._getRandom(130, 255) + ")";
+    this.nameContentHTMLButton = this.name + "button";
+    this.nameContentHTMLCheckbox = this.name + "checkbox";
+    this.styleContentHTML = "<font><div><input type=\"checkbox\" id=" + this.nameContentHTMLCheckbox + " name=" + this.name + " checked> <label for=" + this.name + ">" + this.name + "</label><button id=\"" + this.nameContentHTMLButton + "\" style=\"margin: 3px 3px 3px 10px; padding: 2px 2px 2px 2px\"><font style=\"\">Выбрать</font></button></div></font>";
+    this.vertices = points; //вершины
+
+    this.countEdges = undefined; //количество рёбер
+
+    this.countEdgesToVertice = 3; //количесвто рёбер примыкающих к вершине
+
+    this.countFaceSides = undefined; //количество сторон грани
+  }
+
+  _createClass(ObjectOnScene, [{
+    key: "getObjectGrid",
+    value: function getObjectGrid() {
+      for (var i = 0; i < this.points.length; i++) {
+        for (var j = i + 1; j < this.points.length; j++) {
+          var beginPosition = new Array(this.points[i][0], this.points[i][1], this.points[i][2]);
+          var endPosition = new Array(this.points[j][0], this.points[j][1], this.points[j][2]);
+          this.pointsObjectGrid.push(beginPosition);
+          this.pointsObjectGrid.push(endPosition);
+        }
+      }
+
+      return this.pointsObjectGrid;
+    }
+  }, {
+    key: "_getRandom",
+    value: function _getRandom(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+  }]);
+
+  return ObjectOnScene;
+}();
 
 exports.default = ObjectOnScene;
-},{}],"src/script.js":[function(require,module,exports) {
+},{}],"textures/blizzard/bk.jpg":[function(require,module,exports) {
+module.exports = "/bk.099a5aa3.jpg";
+},{}],"textures/blizzard/ft.jpg":[function(require,module,exports) {
+module.exports = "/ft.9a70cffd.jpg";
+},{}],"textures/blizzard/dn.jpg":[function(require,module,exports) {
+module.exports = "/dn.ff1a96e3.jpg";
+},{}],"textures/blizzard/up.jpg":[function(require,module,exports) {
+module.exports = "/up.1009898b.jpg";
+},{}],"textures/blizzard/lf.jpg":[function(require,module,exports) {
+module.exports = "/lf.26747d39.jpg";
+},{}],"textures/blizzard/rt.jpg":[function(require,module,exports) {
+module.exports = "/rt.4d42f94c.jpg";
+},{}],"src/skybox-loader.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _bk = _interopRequireDefault(require("../textures/blizzard/bk.jpg"));
+
+var _ft = _interopRequireDefault(require("../textures/blizzard/ft.jpg"));
+
+var _dn = _interopRequireDefault(require("../textures/blizzard/dn.jpg"));
+
+var _up = _interopRequireDefault(require("../textures/blizzard/up.jpg"));
+
+var _lf = _interopRequireDefault(require("../textures/blizzard/lf.jpg"));
+
+var _rt = _interopRequireDefault(require("../textures/blizzard/rt.jpg"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var SkyboxLoader = function SkyboxLoader() {
+  var _this = this;
+
+  _classCallCheck(this, SkyboxLoader);
+
+  this._orderNameTextures = ['bk', 'ft', 'up', 'dn', 'lf', 'rt'];
+  this.textures = [];
+  this.back = new Image();
+  this.front = new Image();
+  this.down = new Image();
+  this.up = new Image();
+  this.left = new Image();
+  this.right = new Image();
+  this.back.src = _bk.default; //0
+
+  this.front.src = _ft.default; //1
+
+  this.down.src = _dn.default; //2
+
+  this.up.src = _up.default; //3
+
+  this.left.src = _lf.default; //4
+
+  this.right.src = _rt.default; //5
+
+  this.textures.push({
+    texture: this.back,
+    name: 'bk'
+  });
+  this.textures.push({
+    texture: this.front,
+    name: 'ft'
+  });
+  this.textures.push({
+    texture: this.down,
+    name: 'dn'
+  });
+  this.textures.push({
+    texture: this.up,
+    name: 'up'
+  });
+  this.textures.push({
+    texture: this.left,
+    name: 'lf'
+  });
+  this.textures.push({
+    texture: this.right,
+    name: 'rt'
+  });
+  this.readyTextures = [];
+  this.listTextures = [];
+
+  var _loop = function _loop(i) {
+    _this.textures[i].texture.addEventListener('load', function () {
+      _this.listTextures.push(_this.textures[i]);
+
+      if (_this.listTextures.length == 6) {
+        for (var _i = 0; _i < _this._orderNameTextures.length; _i++) {
+          for (var j = 0; j < _this.listTextures.length; j++) {
+            if (_this._orderNameTextures[_i] == _this.listTextures[j].name) {
+              _this.readyTextures.push(_this.listTextures[j].texture);
+            }
+          }
+        }
+      }
+    });
+  };
+
+  for (var i = 0; i < this.textures.length; i++) {
+    _loop(i);
+  }
+
+  this.isInitSkybox = false;
+};
+
+exports.default = SkyboxLoader;
+},{"../textures/blizzard/bk.jpg":"textures/blizzard/bk.jpg","../textures/blizzard/ft.jpg":"textures/blizzard/ft.jpg","../textures/blizzard/dn.jpg":"textures/blizzard/dn.jpg","../textures/blizzard/up.jpg":"textures/blizzard/up.jpg","../textures/blizzard/lf.jpg":"textures/blizzard/lf.jpg","../textures/blizzard/rt.jpg":"textures/blizzard/rt.jpg"}],"src/script.js":[function(require,module,exports) {
 "use strict";
 
 var THREE = _interopRequireWildcard(require("three"));
@@ -36657,6 +36814,8 @@ var _initScene = _interopRequireDefault(require("./init-scene.js"));
 var _datasetReader = _interopRequireDefault(require("./dataset-reader"));
 
 var _objectOnScene = _interopRequireDefault(require("./object-on-scene"));
+
+var _skyboxLoader = _interopRequireDefault(require("./skybox-loader"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -36679,44 +36838,59 @@ function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o =
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 var canvas = document.getElementById('canvas');
+var listNameObjects = document.getElementById('listNameObjects');
 (0, _initScene.default)(document);
+var skyboxLoader = new _skyboxLoader.default();
 var renderer = new THREE.WebGLRenderer({
-  canvas: canvas
+  canvas: canvas,
+  antialias: true
 });
 var scene = new THREE.Scene();
 var camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height);
-var objectsOnScene = [];
+var objectsInDataset = [];
 var reader = new _datasetReader.default(_small_dataset.default);
+var listObjects = [];
 init();
-loadObjectsOnScene();
+loadObjectsFromDataset();
 animate();
 /* ------------------------------------------------------------------------- */
 
+function preloadSkybox() {
+  if (skyboxLoader.readyTextures.length == 6 && !skyboxLoader.isInitSkybox) {
+    initSkybox();
+    skyboxLoader.isInitSkybox = true;
+  }
+}
+
+function initSkybox() {
+  var loader = new THREE.CubeTextureLoader();
+  var texture = loader.load([skyboxLoader.readyTextures[0].src, skyboxLoader.readyTextures[1].src, skyboxLoader.readyTextures[2].src, skyboxLoader.readyTextures[3].src, skyboxLoader.readyTextures[4].src, skyboxLoader.readyTextures[5].src]);
+  scene.background = texture;
+}
+
 function init() {
-  var planeGeometry = new THREE.PlaneGeometry(100, 100, 1, 1);
-  var planeMaterial = new THREE.MeshBasicMaterial({
-    color: 0x404040
-  });
-  var plane = new THREE.Mesh(planeGeometry, planeMaterial);
-  camera.position.z = 10;
+  camera.position.z = 15;
   camera.position.y = 5;
-  plane.rotation.x = -0.5 * Math.PI;
-  plane.position.x = 0;
-  plane.position.y = -5;
-  plane.position.z = 0;
-  scene.add(plane);
   var axes = new THREE.AxesHelper(20);
   scene.add(axes);
   (0, _sceneController.default)(canvas, axes, camera, canvas.width, canvas.height);
-  renderer.setClearColor(0x909090);
 }
 
 function animate() {
   requestAnimationFrame(animate);
+  preloadSkybox();
   renderer.render(scene, camera);
+  draw();
 }
 
-function loadObjectsOnScene() {
+function draw() {
+  for (var _i = 0, _listObjects = listObjects; _i < _listObjects.length; _i++) {
+    var object = _listObjects[_i];
+    object.line.visible = object.object.checker.checked;
+  }
+}
+
+function loadObjectsFromDataset() {
   var figures = reader.getMeshes();
 
   var _iterator = _createForOfIteratorHelper(figures),
@@ -36728,9 +36902,20 @@ function loadObjectsOnScene() {
           key = _step$value[0],
           value = _step$value[1];
 
-      for (var i = 0; i < value.length; i++) {
-        var object = new _objectOnScene.default(key, value[i]);
-        objectsOnScene.push(object);
+      for (var _i3 = 0; _i3 < value.length; _i3++) {
+        var _object = new _objectOnScene.default(key, value[_i3], _i3);
+
+        if (key == 'thetra') {
+          _object.countEdges = 6;
+          _object.countFaceSides = 3;
+        }
+
+        if (key == 'cubes') {
+          _object.countEdges = 12;
+          _object.countFaceSides = 4;
+        }
+
+        objectsInDataset.push(_object);
       }
     }
   } catch (err) {
@@ -36738,8 +36923,34 @@ function loadObjectsOnScene() {
   } finally {
     _iterator.f();
   }
+
+  for (var _i2 = 0, _objectsInDataset = objectsInDataset; _i2 < _objectsInDataset.length; _i2++) {
+    var object = _objectsInDataset[_i2];
+    listNameObjects.insertAdjacentHTML('afterend', object.styleContentHTML);
+    var checker = document.getElementById(object.nameContentHTMLCheckbox);
+    checker.checked = true;
+    object.checker = checker;
+    var listPoints = object.getObjectGrid();
+    var objectPoints = [];
+
+    for (var i = 0; i < listPoints.length; i++) {
+      var vector = new THREE.Vector3(listPoints[i][0], listPoints[i][1], listPoints[i][2]);
+      objectPoints.push(vector);
+    }
+
+    var material = new THREE.LineBasicMaterial({
+      color: object.color
+    });
+    var geometry = new THREE.BufferGeometry().setFromPoints(objectPoints);
+    var line = new THREE.Line(geometry, material);
+    scene.add(line);
+    listObjects.push({
+      object: object,
+      line: line
+    });
+  }
 }
-},{"three":"node_modules/three/build/three.module.js","../data/small_dataset.json":"data/small_dataset.json","./scene-controller.js":"src/scene-controller.js","./init-scene.js":"src/init-scene.js","./dataset-reader":"src/dataset-reader.js","./object-on-scene":"src/object-on-scene.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"three":"node_modules/three/build/three.module.js","../data/small_dataset.json":"data/small_dataset.json","./scene-controller.js":"src/scene-controller.js","./init-scene.js":"src/init-scene.js","./dataset-reader":"src/dataset-reader.js","./object-on-scene":"src/object-on-scene.js","./skybox-loader":"src/skybox-loader.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -36767,7 +36978,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55667" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50309" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
