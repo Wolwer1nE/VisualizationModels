@@ -36850,6 +36850,11 @@ var camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height);
 var objectsInDataset = [];
 var reader = new _datasetReader.default(_small_dataset.default);
 var listObjects = [];
+var pointOfView = {
+  x: 0,
+  y: 0,
+  z: 0
+};
 init();
 loadObjectsFromDataset();
 animate();
@@ -36978,7 +36983,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50309" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60331" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
