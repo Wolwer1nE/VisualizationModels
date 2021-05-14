@@ -22,6 +22,7 @@ let objectsInDataset = [];
 let reader = new DatasetReader(dataset_meshes);
 let listObjects = [];
 
+let pointOfView = {x : 0, y : 0, z : 0};
 
 init();
 loadObjectsFromDataset();
