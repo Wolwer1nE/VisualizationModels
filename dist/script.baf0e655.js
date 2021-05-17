@@ -36544,7 +36544,7 @@ function initScene(document) {
   canvas.height = HEIGHT_CANVAS; //canvas.style = "display: block; background-color: #303050;"
 
   fieldSidebarObjects.style.background = "#320b35";
-  fieldSidebarProperties.style.background = "#310062";
+  fieldSidebarProperties.style.background = "#510062";
   fieldSidebarObjects.style.minHeight = MIN_HEIGHT_BLOCK_LIST_OBJECTS + 'px';
   fieldSidebarObjects.style.maxHeight = MAX_HEIGHT_BLOCK_LIST_OBJECTS + 'px';
   fieldSidebarProperties.style.minHeight = MIN_HEIGHT_BLOCK_PROPERTIES_OBJECTS + 'px';
@@ -36624,6 +36624,23 @@ function () {
 }();
 
 exports.default = DatasetReader;
+},{}],"src/polygon.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Polygon = function Polygon(points) {
+  _classCallCheck(this, Polygon);
+
+  this.points = points;
+};
+
+exports.default = Polygon;
 },{}],"src/object-on-scene.js":[function(require,module,exports) {
 "use strict";
 
@@ -36631,6 +36648,10 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _polygon = _interopRequireDefault(require("./polygon.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -36646,10 +36667,10 @@ function () {
 
     _classCallCheck(this, ObjectOnScene);
 
+    this.key = name;
     this.name = name + number;
     this.points = points;
     this.checker = undefined;
-    this.pointsObjectGrid = [];
     this.color = "rgb(" + this._getRandom(130, 255) + "," + this._getRandom(130, 255) + "," + this._getRandom(130, 255) + ")";
     this.nameContentHTMLButton = this.name + "button";
     this.nameContentHTMLCheckbox = this.name + "checkbox";
@@ -36658,24 +36679,95 @@ function () {
 
     this.countEdges = undefined; //количество рёбер
 
+    this.countFaces = undefined; //количество граней
+
     this.countEdgesToVertice = 3; //количесвто рёбер примыкающих к вершине
 
     this.countFaceSides = undefined; //количество сторон грани
+
+    this.countPointsPolygon = undefined; //количество точек в одном полигоне
+
+    if (this.key == 'thetra') {
+      this.countEdges = 6;
+      this.countFaces = 4;
+      this.countFaceSides = 3;
+      this.countPointsPolygon = 3;
+    }
+
+    if (this.key == 'cubes') {
+      this.countEdges = 12;
+      this.countFaces = 6;
+      this.countFaceSides = 4;
+      this.countPointsPolygon = 4;
+    }
+
+    this.pointsObjectGrid = [];
+
+    this._getObjectGrid();
+
+    this.pointsObjectPoly = [];
+
+    this._getObjectPoly();
   }
 
   _createClass(ObjectOnScene, [{
-    key: "getObjectGrid",
-    value: function getObjectGrid() {
+    key: "_getObjectPoly",
+    value: function _getObjectPoly() {
+      for (var i = 0; i < this.pointsObjectGrid.length; i += this.countPointsPolygon) {
+        var listPointsPolygon = [];
+
+        for (var j = i; j < i + this.countPointsPolygon; j++) {
+          listPointsPolygon.push(this.pointsObjectGrid[i]);
+        }
+
+        this.pointsObjectPoly.push(new _polygon.default(listPointsPolygon));
+      }
+    }
+  }, {
+    key: "_getObjectGrid",
+    value: function _getObjectGrid() {
+      var minLengthSegment = undefined;
+
       for (var i = 0; i < this.points.length; i++) {
         for (var j = i + 1; j < this.points.length; j++) {
           var beginPosition = new Array(this.points[i][0], this.points[i][1], this.points[i][2]);
           var endPosition = new Array(this.points[j][0], this.points[j][1], this.points[j][2]);
+
+          if (this.countEdges == 12) {
+            var lengthSegment = this._getDistanceBetweenPoints(beginPosition, endPosition);
+
+            if (i == 0 || lengthSegment < minLengthSegment) {
+              minLengthSegment = lengthSegment;
+            }
+          }
+
           this.pointsObjectGrid.push(beginPosition);
           this.pointsObjectGrid.push(endPosition);
         }
       }
 
-      return this.pointsObjectGrid;
+      if (minLengthSegment != undefined) {
+        var pointsGridCube = [];
+
+        for (var _i = 0; _i < this.pointsObjectGrid.length; _i += 2) {
+          var firstPoint = this.pointsObjectGrid[_i];
+          var secondPoint = this.pointsObjectGrid[_i + 1];
+
+          var distance = this._getDistanceBetweenPoints(firstPoint, secondPoint);
+
+          if (distance == minLengthSegment) {
+            pointsGridCube.push(firstPoint);
+            pointsGridCube.push(secondPoint);
+          }
+        }
+
+        this.pointsObjectGrid = pointsGridCube;
+      }
+    }
+  }, {
+    key: "_getDistanceBetweenPoints",
+    value: function _getDistanceBetweenPoints(firstPoint, secondPoint) {
+      return Math.sqrt(Math.pow(firstPoint[0] - secondPoint[0], 2) + Math.pow(firstPoint[1] - secondPoint[1], 2) + Math.pow(firstPoint[2] - secondPoint[2], 2));
     }
   }, {
     key: "_getRandom",
@@ -36688,7 +36780,7 @@ function () {
 }();
 
 exports.default = ObjectOnScene;
-},{}],"textures/blizzard/bk.jpg":[function(require,module,exports) {
+},{"./polygon.js":"src/polygon.js"}],"textures/blizzard/bk.jpg":[function(require,module,exports) {
 module.exports = "/bk.099a5aa3.jpg";
 },{}],"textures/blizzard/ft.jpg":[function(require,module,exports) {
 module.exports = "/ft.9a70cffd.jpg";
@@ -36817,6 +36909,8 @@ var _objectOnScene = _interopRequireDefault(require("./object-on-scene"));
 
 var _skyboxLoader = _interopRequireDefault(require("./skybox-loader"));
 
+var _polygon = _interopRequireDefault(require("./polygon"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
@@ -36874,10 +36968,19 @@ function initSkybox() {
 }
 
 function init() {
+  var planeGeometry = new THREE.PlaneGeometry(20, 20);
+  var planeMaterial = new THREE.MeshBasicMaterial({
+    color: "rgb(" + getRandom(100, 150) + "," + getRandom(100, 150) + "," + getRandom(100, 150) + ")",
+    side: THREE.DoubleSide
+  });
+  var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
+  planeMesh.position.y = -2;
+  planeMesh.rotation.x = planeMesh.rotation.x - Math.PI / 2;
   camera.position.z = 15;
   camera.position.y = 5;
   var axes = new THREE.AxesHelper(20);
   scene.add(axes);
+  scene.add(planeMesh);
   (0, _sceneController.default)(canvas, axes, camera, canvas.width, canvas.height);
 }
 
@@ -36907,20 +37010,10 @@ function loadObjectsFromDataset() {
           key = _step$value[0],
           value = _step$value[1];
 
-      for (var _i3 = 0; _i3 < value.length; _i3++) {
-        var _object = new _objectOnScene.default(key, value[_i3], _i3);
+      for (var _i4 = 0; _i4 < value.length; _i4++) {
+        var _object2 = new _objectOnScene.default(key, value[_i4], _i4);
 
-        if (key == 'thetra') {
-          _object.countEdges = 6;
-          _object.countFaceSides = 3;
-        }
-
-        if (key == 'cubes') {
-          _object.countEdges = 12;
-          _object.countFaceSides = 4;
-        }
-
-        objectsInDataset.push(_object);
+        objectsInDataset.push(_object2);
       }
     }
   } catch (err) {
@@ -36935,7 +37028,7 @@ function loadObjectsFromDataset() {
     var checker = document.getElementById(object.nameContentHTMLCheckbox);
     checker.checked = true;
     object.checker = checker;
-    var listPoints = object.getObjectGrid();
+    var listPoints = object.pointsObjectGrid;
     var objectPoints = [];
 
     for (var i = 0; i < listPoints.length; i++) {
@@ -36954,8 +37047,42 @@ function loadObjectsFromDataset() {
       line: line
     });
   }
+
+  for (var _i3 = 0; _i3 < listObjects.length; _i3++) {
+    var _object = listObjects[_i3].object;
+    var pointsPolygon = _object.pointsObjectPoly;
+
+    for (var j = 0; j < pointsPolygon.length; j++) {
+      var vertices = [];
+      var polyPoints = pointsPolygon[j].points;
+
+      for (var k = 0; k < polyPoints.length; k += _object.countPointsPolygon) {
+        for (var m = k * _object.countPointsPolygon; m < k * _object.countPointsPolygon + _object.countPointsPolygon; m++) {
+          vertices.push(polyPoints[m][0]);
+          vertices.push(polyPoints[m][1]);
+          vertices.push(polyPoints[m][2]);
+        }
+
+        var geometryPoly = new THREE.BufferGeometry();
+        var array = new Float32Array(vertices);
+        geometryPoly.setAttribute('position', new THREE.BufferAttribute(array, _object.countPointsPolygon));
+
+        var _material = new THREE.MeshBasicMaterial({
+          color: 0x990088,
+          side: THREE.DoubleSide
+        });
+
+        var mesh = new THREE.Mesh(geometryPoly, _material);
+        scene.add(mesh);
+      }
+    }
+  }
 }
-},{"three":"node_modules/three/build/three.module.js","../data/small_dataset.json":"data/small_dataset.json","./scene-controller.js":"src/scene-controller.js","./init-scene.js":"src/init-scene.js","./dataset-reader":"src/dataset-reader.js","./object-on-scene":"src/object-on-scene.js","./skybox-loader":"src/skybox-loader.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+
+function getRandom(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+},{"three":"node_modules/three/build/three.module.js","../data/small_dataset.json":"data/small_dataset.json","./scene-controller.js":"src/scene-controller.js","./init-scene.js":"src/init-scene.js","./dataset-reader":"src/dataset-reader.js","./object-on-scene":"src/object-on-scene.js","./skybox-loader":"src/skybox-loader.js","./polygon":"src/polygon.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -36983,7 +37110,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60331" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53473" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

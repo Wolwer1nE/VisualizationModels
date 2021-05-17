@@ -18,7 +18,7 @@ export default function initScene(document) {
     //canvas.style = "display: block; background-color: #303050;"
 
     fieldSidebarObjects.style.background = "#320b35";
-    fieldSidebarProperties.style.background = "#310062"
+    fieldSidebarProperties.style.background = "#510062"
 
     fieldSidebarObjects.style.minHeight    = MIN_HEIGHT_BLOCK_LIST_OBJECTS + 'px';
     fieldSidebarObjects.style.maxHeight    = MAX_HEIGHT_BLOCK_LIST_OBJECTS + 'px';
