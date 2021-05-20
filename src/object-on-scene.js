@@ -1,11 +1,14 @@
-import {default as Polygon} from './polygon.js'
+import {default as Triangle} from './figures/triangle'
+import {default as Square}   from './figures/square'
+import {default as Thetra}   from './figures/thetra'
+import {default as Cube}     from './figures/cube'
 
 export default class ObjectOnScene {
-    constructor(name, points, number = 0) {
+    constructor(name, points, number = 0, isHelper = false) {
         this.key = name;
         this.name = name + number; 
-        this.points = points; 
-
+        this.points = points;
+        
         this.checker = undefined;
         
         this.color = "rgb(" + this._getRandom(130, 255) + "," + this._getRandom(130, 255) + "," + this._getRandom(130, 255) + ")";
@@ -18,75 +21,37 @@ export default class ObjectOnScene {
         + this.name + "</label><button id=\"" + this.nameContentHTMLButton + 
         "\" style=\"margin: 3px 3px 3px 10px; padding: 2px 2px 2px 2px\"><font style=\"\">Выбрать</font></button></div></font>"
 
-        this.vertices = points;                 //вершины
-        this.countEdges = undefined             //количество рёбер
-        this.countFaces = undefined;            //количество граней
-        this.countEdgesToVertice = 3;           //количесвто рёбер примыкающих к вершине
-        this.countFaceSides = undefined;        //количество сторон грани
 
-        this.countPointsPolygon = undefined      //количество точек в одном полигоне
+        this.figure = undefined; 
 
-        if (this.key == 'thetra') {
-            this.countEdges = 6;
-            this.countFaces = 4; 
-            this.countFaceSides = 3;
-            this.countPointsPolygon = 3;
-        }
-        
-        if (this.key == 'cubes') {
-            this.countEdges = 12;
-            this.countFaces = 6; 
-            this.countFaceSides = 4;
-            this.countPointsPolygon = 4;
+        switch (this.key) {
+            case 'triangles': 
+                this.figure = new Triangle(this.points);
+                break;
+            case 'squares':
+                this.figure = new Square(this.points);
+                break;
+            case 'thetra' :
+                this.figure = new Thetra(this.points);
+                break;
+            case 'cubes' :
+                this.figure = new Cube(this.points);
+            default: break;
         }
 
         this.pointsObjectGrid = [];
         this._getObjectGrid();
 
-        this.pointsObjectPoly = [];
-        this._getObjectPoly();
-    }
-
-    _getObjectPoly() {
-        for (let i = 0; i < this.pointsObjectGrid.length; i+= this.countPointsPolygon) {
-            let listPointsPolygon = [];
-            for (let j = i; j < i + this.countPointsPolygon; j++) {
-                listPointsPolygon.push(this.pointsObjectGrid[i]);
-            }
-            this.pointsObjectPoly.push(new Polygon(listPointsPolygon));
-        }
+        this.pointsMesh = [];
+        this._getMesh();
     }
 
     _getObjectGrid() {
-        let minLengthSegment = undefined;
-        for (let i = 0; i < this.points.length; i++) {
-            for (let j = i + 1; j < this.points.length; j++) {            
-                let beginPosition = new Array(this.points[i][0], this.points[i][1], this.points[i][2]);
-                let endPosition   = new Array(this.points[j][0], this.points[j][1], this.points[j][2]);
+        this.pointsObjectGrid = this.figure.pointsGrid;
+    }
 
-                if (this.countEdges == 12) {
-                    let lengthSegment = this._getDistanceBetweenPoints(beginPosition, endPosition);
-                    if (i == 0 || lengthSegment < minLengthSegment) {
-                        minLengthSegment = lengthSegment;
-                    }
-                }
-                this.pointsObjectGrid.push(beginPosition);
-                this.pointsObjectGrid.push(endPosition);
-            }
-        }
-        if (minLengthSegment != undefined) {
-            let pointsGridCube = [];
-            for(let i = 0; i < this.pointsObjectGrid.length; i+=2) {
-                let firstPoint = this.pointsObjectGrid[i];
-                let secondPoint = this.pointsObjectGrid[i+1];
-                let distance = this._getDistanceBetweenPoints(firstPoint, secondPoint); 
-                if (distance == minLengthSegment) {
-                    pointsGridCube.push(firstPoint);
-                    pointsGridCube.push(secondPoint);
-                }
-            }
-            this.pointsObjectGrid = pointsGridCube;
-        }
+    _getMesh() {
+        this.pointsMesh = this.figure.pointsMesh;
     }
 
     _getDistanceBetweenPoints(firstPoint, secondPoint) {

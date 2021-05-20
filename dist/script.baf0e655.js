@@ -36407,10 +36407,10 @@ module.exports = {
   "points": [[-1, -1, -1], [-1, 1, -1], [1, 1, -1], [1, -1, -1], [-1, -1, 1], [-1, 1, 1], [1, 1, 1], [1, -1, 1], [0, 0, 1.5]],
   "mesh": {
     "PZT-4": {
-      "cubes": [[0, 1, 2, 3, 4, 5, 6, 7]],
+      "cubes": [],
       "thetra": [[5, 6, 7, 8]],
-      "triangles": [],
-      "squares": []
+      "triangles": [[0, 1, 2]],
+      "squares": [[5, 6, 7, 4]]
     }
   },
   "type": 5,
@@ -36624,7 +36624,7 @@ function () {
 }();
 
 exports.default = DatasetReader;
-},{}],"src/polygon.js":[function(require,module,exports) {
+},{}],"src/figures/line.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -36634,13 +36634,276 @@ exports.default = void 0;
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Polygon = function Polygon(points) {
-  _classCallCheck(this, Polygon);
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
-  this.points = points;
-};
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-exports.default = Polygon;
+var Line =
+/*#__PURE__*/
+function () {
+  function Line(firstPoint, secondPoint) {
+    _classCallCheck(this, Line);
+
+    this.firstPoint = firstPoint;
+    this.secondPoint = secondPoint;
+  }
+
+  _createClass(Line, [{
+    key: "isEqual",
+    value: function isEqual(anotherLine) {
+      return this.firstPoint == anotherLine.firstPoint && this.secondPoint == anotherLine.secondPoint || this.firstPoint == anotherLine.secondPoint && this.secondPoint == anotherLine.firstPoint;
+    }
+  }]);
+
+  return Line;
+}();
+
+exports.default = Line;
+},{}],"src/figures/triangle.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _line = _interopRequireDefault(require("./line"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Triangle =
+/*#__PURE__*/
+function () {
+  function Triangle(points) {
+    _classCallCheck(this, Triangle);
+
+    this.vertices = points; //вершины
+
+    this.countEdges = 3; //количество рёбер 
+
+    this.countFaces = 1; //количество граней
+
+    this.countEdgesToVertice = 1; //количество рёбер примыкающих к вершине
+
+    this.countPolygonsInOneFace = 1; //количество полигонов в одной грани
+
+    this.pointsGrid = [];
+
+    this._getGrid();
+
+    this.colorMesh = 0xFF1122;
+    this.pointsMesh = [];
+
+    this._getMesh();
+  }
+
+  _createClass(Triangle, [{
+    key: "_getGrid",
+    value: function _getGrid() {
+      var lines = [];
+
+      for (var i = 0; i < this.vertices.length; i++) {
+        var firstPoint = this.vertices[i];
+
+        for (var j = i + 1; j < this.vertices.length; j++) {
+          var secondPoint = this.vertices[j];
+          this.pointsGrid.push(firstPoint);
+          this.pointsGrid.push(secondPoint);
+        }
+      }
+    }
+  }, {
+    key: "_getMesh",
+    value: function _getMesh() {
+      this.pointsMesh = this.vertices;
+    }
+  }]);
+
+  return Triangle;
+}();
+
+exports.default = Triangle;
+},{"./line":"src/figures/line.js"}],"src/figures/square.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Square =
+/*#__PURE__*/
+function () {
+  function Square(points) {
+    _classCallCheck(this, Square);
+
+    this.vertices = points; //вершины
+
+    this.countEdges = 4; //количество рёбер
+
+    this.countFaces = 1; //количество граней
+
+    this.countEdgesToVertice = 2; //количество рёбер примыкающих к вершине
+
+    this.countPolygonsInOneFace = 2; //количество полигонов в грани
+
+    this.colorMesh = 0x9922FF;
+    this.pointsGrid = [];
+
+    this._getGrid();
+
+    this.pointsMesh = [];
+
+    this._getMesh();
+  }
+
+  _createClass(Square, [{
+    key: "_getGrid",
+    value: function _getGrid() {
+      for (var i = 0; i < this.vertices.length; i++) {
+        var firstPoint = this.vertices[i];
+
+        for (var j = i + 1; j < this.vertices.length; j++) {
+          var secondPoint = this.vertices[j];
+          this.pointsGrid.push(firstPoint);
+          this.pointsGrid.push(secondPoint);
+        }
+      }
+    }
+  }, {
+    key: "_getMesh",
+    value: function _getMesh() {
+      this.pointsMesh = [this.vertices[0], this.vertices[1], this.vertices[3], this.vertices[2], this.vertices[1], this.vertices[3]];
+    }
+  }]);
+
+  return Square;
+}();
+
+exports.default = Square;
+},{}],"src/figures/thetra.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Thetra =
+/*#__PURE__*/
+function () {
+  function Thetra(points) {
+    _classCallCheck(this, Thetra);
+
+    this.vertices = points;
+    this.countEdges = 6;
+    this.countFaces = 4;
+    this.countEdgesToVertice = 3;
+    this.countPolygonsInOneFace = 1;
+    this.colorMesh = 0xED5599;
+    this.pointsGrid = [];
+
+    this._getGrid();
+
+    this.pointsMesh = [];
+    console.log(this.pointsMesh);
+
+    this._getMesh();
+  }
+
+  _createClass(Thetra, [{
+    key: "_getGrid",
+    value: function _getGrid() {
+      for (var i = 0; i < this.vertices.length; i++) {
+        var firstPoint = this.vertices[i];
+
+        for (var j = i + 1; j < this.vertices.length; j++) {
+          var secondPoint = this.vertices[j];
+          this.pointsGrid.push(firstPoint);
+          this.pointsGrid.push(secondPoint);
+        }
+      }
+    }
+  }, {
+    key: "_getMesh",
+    value: function _getMesh() {
+      this.pointsMesh = [this.vertices[0], this.vertices[1], this.vertices[2], this.vertices[0], this.vertices[2], this.vertices[3], this.vertices[0], this.vertices[3], this.vertices[1], this.vertices[3], this.vertices[2], this.vertices[1]];
+    }
+  }]);
+
+  return Thetra;
+}();
+
+exports.default = Thetra;
+},{}],"src/figures/cube.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Cube =
+/*#__PURE__*/
+function () {
+  function Cube(points) {
+    _classCallCheck(this, Cube);
+
+    this.vertices = points; //вершины
+
+    this.countEdges = 12; //количество рёбер 
+
+    this.countFaces = 6; //количество граней
+
+    this.countEdgesToVertice = 3; //количество рёбер примыкающих к вершине
+
+    this.countPolygonsInOneFace = 4; //количество полигонов в одной грани
+
+    this.colorMesh = 0xFFFF99;
+    this.pointsGrid = [];
+
+    this._getGrid();
+  }
+
+  _createClass(Cube, [{
+    key: "_getGrid",
+    value: function _getGrid() {
+      var points = [];
+      return points;
+    }
+  }, {
+    key: "_getMesh",
+    value: function _getMesh() {}
+  }]);
+
+  return Cube;
+}();
+
+exports.default = Cube;
 },{}],"src/object-on-scene.js":[function(require,module,exports) {
 "use strict";
 
@@ -36649,7 +36912,13 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _polygon = _interopRequireDefault(require("./polygon.js"));
+var _triangle = _interopRequireDefault(require("./figures/triangle"));
+
+var _square = _interopRequireDefault(require("./figures/square"));
+
+var _thetra = _interopRequireDefault(require("./figures/thetra"));
+
+var _cube = _interopRequireDefault(require("./figures/cube"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -36664,6 +36933,7 @@ var ObjectOnScene =
 function () {
   function ObjectOnScene(name, points) {
     var number = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
+    var isHelper = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
     _classCallCheck(this, ObjectOnScene);
 
@@ -36675,94 +36945,46 @@ function () {
     this.nameContentHTMLButton = this.name + "button";
     this.nameContentHTMLCheckbox = this.name + "checkbox";
     this.styleContentHTML = "<font><div><input type=\"checkbox\" id=" + this.nameContentHTMLCheckbox + " name=" + this.name + " checked> <label for=" + this.name + ">" + this.name + "</label><button id=\"" + this.nameContentHTMLButton + "\" style=\"margin: 3px 3px 3px 10px; padding: 2px 2px 2px 2px\"><font style=\"\">Выбрать</font></button></div></font>";
-    this.vertices = points; //вершины
+    this.figure = undefined;
 
-    this.countEdges = undefined; //количество рёбер
+    switch (this.key) {
+      case 'triangles':
+        this.figure = new _triangle.default(this.points);
+        break;
 
-    this.countFaces = undefined; //количество граней
+      case 'squares':
+        this.figure = new _square.default(this.points);
+        break;
 
-    this.countEdgesToVertice = 3; //количесвто рёбер примыкающих к вершине
+      case 'thetra':
+        this.figure = new _thetra.default(this.points);
+        break;
 
-    this.countFaceSides = undefined; //количество сторон грани
+      case 'cubes':
+        this.figure = new _cube.default(this.points);
 
-    this.countPointsPolygon = undefined; //количество точек в одном полигоне
-
-    if (this.key == 'thetra') {
-      this.countEdges = 6;
-      this.countFaces = 4;
-      this.countFaceSides = 3;
-      this.countPointsPolygon = 3;
-    }
-
-    if (this.key == 'cubes') {
-      this.countEdges = 12;
-      this.countFaces = 6;
-      this.countFaceSides = 4;
-      this.countPointsPolygon = 4;
+      default:
+        break;
     }
 
     this.pointsObjectGrid = [];
 
     this._getObjectGrid();
 
-    this.pointsObjectPoly = [];
+    this.pointsMesh = [];
 
-    this._getObjectPoly();
+    this._getMesh();
   }
 
   _createClass(ObjectOnScene, [{
-    key: "_getObjectPoly",
-    value: function _getObjectPoly() {
-      for (var i = 0; i < this.pointsObjectGrid.length; i += this.countPointsPolygon) {
-        var listPointsPolygon = [];
-
-        for (var j = i; j < i + this.countPointsPolygon; j++) {
-          listPointsPolygon.push(this.pointsObjectGrid[i]);
-        }
-
-        this.pointsObjectPoly.push(new _polygon.default(listPointsPolygon));
-      }
-    }
-  }, {
     key: "_getObjectGrid",
     value: function _getObjectGrid() {
-      var minLengthSegment = undefined;
-
-      for (var i = 0; i < this.points.length; i++) {
-        for (var j = i + 1; j < this.points.length; j++) {
-          var beginPosition = new Array(this.points[i][0], this.points[i][1], this.points[i][2]);
-          var endPosition = new Array(this.points[j][0], this.points[j][1], this.points[j][2]);
-
-          if (this.countEdges == 12) {
-            var lengthSegment = this._getDistanceBetweenPoints(beginPosition, endPosition);
-
-            if (i == 0 || lengthSegment < minLengthSegment) {
-              minLengthSegment = lengthSegment;
-            }
-          }
-
-          this.pointsObjectGrid.push(beginPosition);
-          this.pointsObjectGrid.push(endPosition);
-        }
-      }
-
-      if (minLengthSegment != undefined) {
-        var pointsGridCube = [];
-
-        for (var _i = 0; _i < this.pointsObjectGrid.length; _i += 2) {
-          var firstPoint = this.pointsObjectGrid[_i];
-          var secondPoint = this.pointsObjectGrid[_i + 1];
-
-          var distance = this._getDistanceBetweenPoints(firstPoint, secondPoint);
-
-          if (distance == minLengthSegment) {
-            pointsGridCube.push(firstPoint);
-            pointsGridCube.push(secondPoint);
-          }
-        }
-
-        this.pointsObjectGrid = pointsGridCube;
-      }
+      this.pointsObjectGrid = this.figure.pointsGrid;
+    }
+  }, {
+    key: "_getMesh",
+    value: function _getMesh() {
+      this.pointsMesh = this.figure.pointsMesh;
     }
   }, {
     key: "_getDistanceBetweenPoints",
@@ -36780,7 +37002,7 @@ function () {
 }();
 
 exports.default = ObjectOnScene;
-},{"./polygon.js":"src/polygon.js"}],"textures/blizzard/bk.jpg":[function(require,module,exports) {
+},{"./figures/triangle":"src/figures/triangle.js","./figures/square":"src/figures/square.js","./figures/thetra":"src/figures/thetra.js","./figures/cube":"src/figures/cube.js"}],"textures/blizzard/bk.jpg":[function(require,module,exports) {
 module.exports = "/bk.099a5aa3.jpg";
 },{}],"textures/blizzard/ft.jpg":[function(require,module,exports) {
 module.exports = "/ft.9a70cffd.jpg";
@@ -36909,8 +37131,6 @@ var _objectOnScene = _interopRequireDefault(require("./object-on-scene"));
 
 var _skyboxLoader = _interopRequireDefault(require("./skybox-loader"));
 
-var _polygon = _interopRequireDefault(require("./polygon"));
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _getRequireWildcardCache(nodeInterop) { if (typeof WeakMap !== "function") return null; var cacheBabelInterop = new WeakMap(); var cacheNodeInterop = new WeakMap(); return (_getRequireWildcardCache = function (nodeInterop) { return nodeInterop ? cacheNodeInterop : cacheBabelInterop; })(nodeInterop); }
@@ -36940,10 +37160,16 @@ var renderer = new THREE.WebGLRenderer({
   antialias: true
 });
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height);
+var camera = new THREE.PerspectiveCamera(75, canvas.width / canvas.height);
+window.addEventListener('resize', function () {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
+renderer.setClearColor("#8866aa");
 var objectsInDataset = [];
 var reader = new _datasetReader.default(_small_dataset.default);
-var listObjects = [];
+var listObjectsOnScene = [];
 var pointOfView = {
   x: 0,
   y: 0,
@@ -36967,10 +37193,26 @@ function initSkybox() {
   scene.background = texture;
 }
 
+function initLight() {
+  var pointLightLeftFront = new THREE.PointLight(0xFFFFFF, 1, 100);
+  pointLightLeftFront.position.set(-5, 0, 5);
+  var pointLightRightFront = new THREE.PointLight(0xFFFFFF, 1, 100);
+  pointLightRightFront.position.set(5, 0, 5);
+  var pointLightLeftBack = new THREE.PointLight(0xFFFFFF, 1, 100);
+  pointLightLeftBack.position.set(-5, 0, -5);
+  var pointLightRightBack = new THREE.PointLight(0xFFFFFF, 1, 100);
+  pointLightRightBack.position.set(5, 0, -5);
+  scene.add(pointLightLeftFront);
+  scene.add(pointLightRightFront);
+  scene.add(pointLightLeftBack);
+  scene.add(pointLightRightBack);
+}
+
 function init() {
+  initLight();
   var planeGeometry = new THREE.PlaneGeometry(20, 20);
-  var planeMaterial = new THREE.MeshBasicMaterial({
-    color: "rgb(" + getRandom(100, 150) + "," + getRandom(100, 150) + "," + getRandom(100, 150) + ")",
+  var planeMaterial = new THREE.MeshPhongMaterial({
+    color: "rgb(" + getRandom(90, 100) + "," + getRandom(90, 100) + "," + getRandom(90, 100) + ")",
     side: THREE.DoubleSide
   });
   var planeMesh = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -36981,6 +37223,15 @@ function init() {
   var axes = new THREE.AxesHelper(20);
   scene.add(axes);
   scene.add(planeMesh);
+
+  document.getElementById('planeHide').onclick = function () {
+    planeMesh.visible = !planeMesh.visible;
+  };
+
+  document.getElementById('axesHide').onclick = function () {
+    axes.visible = !axes.visible;
+  };
+
   (0, _sceneController.default)(canvas, axes, camera, canvas.width, canvas.height);
 }
 
@@ -36992,9 +37243,10 @@ function animate() {
 }
 
 function draw() {
-  for (var _i = 0, _listObjects = listObjects; _i < _listObjects.length; _i++) {
-    var object = _listObjects[_i];
-    object.line.visible = object.object.checker.checked;
+  for (var _i = 0, _listObjectsOnScene = listObjectsOnScene; _i < _listObjectsOnScene.length; _i++) {
+    var obj = _listObjectsOnScene[_i];
+    if (obj.object.key != 'plane') obj.line.visible = obj.object.checker.checked;
+    obj.mesh.visible = obj.object.checker.checked;
   }
 }
 
@@ -37021,6 +37273,8 @@ function loadObjectsFromDataset() {
   } finally {
     _iterator.f();
   }
+
+  var listObjects = [];
 
   for (var _i2 = 0, _objectsInDataset = objectsInDataset; _i2 < _objectsInDataset.length; _i2++) {
     var object = _objectsInDataset[_i2];
@@ -37050,39 +37304,42 @@ function loadObjectsFromDataset() {
 
   for (var _i3 = 0; _i3 < listObjects.length; _i3++) {
     var _object = listObjects[_i3].object;
-    var pointsPolygon = _object.pointsObjectPoly;
+    var _line = listObjects[_i3].line;
+    var figure = listObjects[_i3].object.figure;
 
-    for (var j = 0; j < pointsPolygon.length; j++) {
-      var vertices = [];
-      var polyPoints = pointsPolygon[j].points;
+    var _material = new THREE.MeshPhongMaterial({
+      color: figure.colorMesh,
+      side: THREE.DoubleSide
+    });
 
-      for (var k = 0; k < polyPoints.length; k += _object.countPointsPolygon) {
-        for (var m = k * _object.countPointsPolygon; m < k * _object.countPointsPolygon + _object.countPointsPolygon; m++) {
-          vertices.push(polyPoints[m][0]);
-          vertices.push(polyPoints[m][1]);
-          vertices.push(polyPoints[m][2]);
-        }
+    var _geometry = new THREE.BufferGeometry();
 
-        var geometryPoly = new THREE.BufferGeometry();
-        var array = new Float32Array(vertices);
-        geometryPoly.setAttribute('position', new THREE.BufferAttribute(array, _object.countPointsPolygon));
+    var vertices = [];
 
-        var _material = new THREE.MeshBasicMaterial({
-          color: 0x990088,
-          side: THREE.DoubleSide
-        });
-
-        var mesh = new THREE.Mesh(geometryPoly, _material);
-        scene.add(mesh);
-      }
+    for (var j = 0; j < figure.pointsMesh.length; j++) {
+      vertices.push(figure.pointsMesh[j][0]);
+      vertices.push(figure.pointsMesh[j][1]);
+      vertices.push(figure.pointsMesh[j][2]);
     }
+
+    _geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+
+    _geometry.computeVertexNormals();
+
+    var mesh = new THREE.Mesh(_geometry, _material);
+    scene.add(mesh);
+    listObjectsOnScene.push({
+      object: _object,
+      line: _line,
+      mesh: mesh
+    });
   }
 }
 
 function getRandom(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
-},{"three":"node_modules/three/build/three.module.js","../data/small_dataset.json":"data/small_dataset.json","./scene-controller.js":"src/scene-controller.js","./init-scene.js":"src/init-scene.js","./dataset-reader":"src/dataset-reader.js","./object-on-scene":"src/object-on-scene.js","./skybox-loader":"src/skybox-loader.js","./polygon":"src/polygon.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"three":"node_modules/three/build/three.module.js","../data/small_dataset.json":"data/small_dataset.json","./scene-controller.js":"src/scene-controller.js","./init-scene.js":"src/init-scene.js","./dataset-reader":"src/dataset-reader.js","./object-on-scene":"src/object-on-scene.js","./skybox-loader":"src/skybox-loader.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -37110,7 +37367,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53473" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56451" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

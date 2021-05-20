@@ -5,7 +5,6 @@ import initScene from './init-scene.js'
 import DatasetReader from './dataset-reader';
 import {default as ObjectOnScene} from './object-on-scene';
 import {default as SkyboxLoader}  from './skybox-loader';
-import {default as Polygon} from './polygon';
 
 const canvas = document.getElementById('canvas');
 const listNameObjects = document.getElementById('listNameObjects');
@@ -16,11 +15,22 @@ let skyboxLoader = new SkyboxLoader()
 
 const renderer  = new THREE.WebGLRenderer( {canvas : canvas, antialias : true} );
 const scene     = new THREE.Scene();
-const camera    = new THREE.PerspectiveCamera(60, canvas.width / canvas.height);
+const camera    = new THREE.PerspectiveCamera(75, canvas.width / canvas.height);
+
+window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+})
+
+renderer.setClearColor("#8866aa");
 
 let objectsInDataset = [];
 let reader = new DatasetReader(dataset_meshes);
-let listObjects = [];
+
+
+let listObjectsOnScene = [];
+
 
 let pointOfView = {x : 0, y : 0, z : 0};
 
@@ -49,22 +59,43 @@ function initSkybox()
     ]);
     scene.background = texture;
 }
+function initLight() {    
+    const pointLightLeftFront = new THREE.PointLight(0xFFFFFF, 1, 100);
+    pointLightLeftFront.position.set(-5, 0, 5);
 
+    const pointLightRightFront = new THREE.PointLight(0xFFFFFF, 1, 100);
+    pointLightRightFront.position.set(5, 0, 5);
+
+    const pointLightLeftBack = new THREE.PointLight(0xFFFFFF, 1, 100);
+    pointLightLeftBack.position.set(-5, 0, -5);
+
+    const pointLightRightBack = new THREE.PointLight(0xFFFFFF, 1, 100);
+    pointLightRightBack.position.set(5, 0, -5);
+
+    scene.add(pointLightLeftFront);
+    scene.add(pointLightRightFront);
+    scene.add(pointLightLeftBack);
+    scene.add(pointLightRightBack);
+}
 function init() {
+    initLight();
     let planeGeometry = new THREE.PlaneGeometry(20, 20);
-    let planeMaterial = new THREE.MeshBasicMaterial(
-        {color : "rgb("+getRandom(100, 150) + "," +getRandom(100,150) + "," + getRandom(100, 150) + ")", side : THREE.DoubleSide}
+    let planeMaterial = new THREE.MeshPhongMaterial(
+        {color : "rgb("+getRandom(90, 100) + "," +getRandom(90,100) + "," + getRandom(90, 100) + ")", side : THREE.DoubleSide}
         );
     let planeMesh = new THREE.Mesh(planeGeometry, planeMaterial); 
-
+    
     planeMesh.position.y = -2;
     planeMesh.rotation.x = planeMesh.rotation.x - Math.PI / 2;
 
     camera.position.z = 15;
     camera.position.y = 5;
     let axes = new THREE.AxesHelper(20);
+    
     scene.add(axes);
     scene.add(planeMesh);
+    document.getElementById('planeHide').onclick = () => { planeMesh.visible = !planeMesh.visible; }
+    document.getElementById('axesHide').onclick = () => { axes.visible = !axes.visible; }
     initSceneController(canvas, axes, camera, canvas.width, canvas.height);
 }
 
@@ -76,8 +107,9 @@ function animate() {
 }
 
 function draw() {
-    for (let object of listObjects) {
-        object.line.visible = object.object.checker.checked;
+    for (let obj of listObjectsOnScene) {
+        if (obj.object.key != 'plane') obj.line.visible = obj.object.checker.checked;
+        obj.mesh.visible = obj.object.checker.checked;
     }
 }
 
@@ -89,7 +121,7 @@ function loadObjectsFromDataset() {
             objectsInDataset.push(object);
         }
     }
-
+    let listObjects = [];
     for (let object of objectsInDataset) {
         listNameObjects.insertAdjacentHTML('afterend', object.styleContentHTML);
         let checker = document.getElementById(object.nameContentHTMLCheckbox);
@@ -97,12 +129,14 @@ function loadObjectsFromDataset() {
         object.checker = checker;
 
         let listPoints = object.pointsObjectGrid;
+
         let objectPoints = [];
     
         for(let i = 0; i < listPoints.length; i++) {
             let vector = new THREE.Vector3(listPoints[i][0], listPoints[i][1], listPoints[i][2]);
             objectPoints.push(vector);
         }
+
         const material = new THREE.LineBasicMaterial({color:object.color});
         const geometry = new THREE.BufferGeometry().setFromPoints(objectPoints);
         const line = new THREE.Line(geometry, material);
@@ -113,26 +147,29 @@ function loadObjectsFromDataset() {
 
     for (let i = 0; i < listObjects.length; i++) {
         let object = listObjects[i].object;
-        let pointsPolygon = object.pointsObjectPoly;
-        for (let j = 0; j < pointsPolygon.length; j++) {
-            let vertices = [];
-            let polyPoints = pointsPolygon[j].points;            
-            for (let k = 0; k < polyPoints.length; k += object.countPointsPolygon) {
-                for (let m = k * object.countPointsPolygon; m < k * object.countPointsPolygon + object.countPointsPolygon; m++) {
-                    vertices.push(polyPoints[m][0]);
-                    vertices.push(polyPoints[m][1]);
-                    vertices.push(polyPoints[m][2]);   
-                }
-                let geometryPoly = new THREE.BufferGeometry();
-                let array        = new Float32Array(vertices);
-                geometryPoly.setAttribute('position', new THREE.BufferAttribute(array, object.countPointsPolygon));
-                let material     = new THREE.MeshBasicMaterial({color : 0x990088, side : THREE.DoubleSide});
-                let mesh = new THREE.Mesh(geometryPoly, material);
-                scene.add(mesh);
-            }
+        let line = listObjects[i].line;
+
+        let figure = listObjects[i].object.figure; 
+
+        const material = new THREE.MeshPhongMaterial({color : figure.colorMesh, side : THREE.DoubleSide});
+        const geometry = new THREE.BufferGeometry();
+
+        let vertices = [];
+        for (let j = 0; j < figure.pointsMesh.length; j++) {
+            vertices.push(figure.pointsMesh[j][0]);
+            vertices.push(figure.pointsMesh[j][1]);
+            vertices.push(figure.pointsMesh[j][2]);
         }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+        geometry.computeVertexNormals();
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+        
+        listObjectsOnScene.push({object, line, mesh});
     }
 }
 function getRandom(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
